@@ -6,7 +6,6 @@ include ../kaldi.mk
 
 LDFLAGS += $(CUDA_LDFLAGS)
 LDLIBS += $(CUDA_LDLIBS)
-LDLIBS += $(MPICH_LDLIBS)
 
 TESTFILES = arpa-file-parser-test arpa-lm-compiler-test
 

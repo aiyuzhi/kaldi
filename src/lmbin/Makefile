@@ -6,7 +6,6 @@ include ../kaldi.mk
 
 LDFLAGS += $(CUDA_LDFLAGS)
 LDLIBS += $(CUDA_LDLIBS)
-LDLIBS += $(MPICH_LDLIBS)
 
 BINFILES = arpa2fst arpa-to-const-arpa 
 

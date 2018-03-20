@@ -158,7 +158,7 @@ class MatrixExponential {
   // Keeps adding terms in the Taylor series till there is no further
   // change in the result.  Stores some of the powers of A in powers_,
   // and the number of terms K as K_.
-  void ComputeTaylor(const MatrixBase<Real> &P, MatrixBase<Real> *B0);
+  void ComputeTaylor(const MatrixBase<Real> &P, MatrixBase<Real> *B);
 
   // Backprop through the Taylor-series computation above.
   // note: hX is \hat{X} in the math; hM is \hat{M} in the math.

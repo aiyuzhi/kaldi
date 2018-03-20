@@ -78,7 +78,7 @@ template double VecVec(const CuVectorBase<double> &A, const CuVectorBase<float> 
 
 template<typename Real>
 void AddVecStreamed(Real alpha, std::vector<CuSubVector<Real>* > &des,
-		const std::vector<CuSubVector<Real>* > &src, Real beta = 1.0)
+		const std::vector<CuSubVector<Real>* > &src, Real beta)
 {
 	  KALDI_ASSERT(src.size() == des.size());
 	  int32 size = src.size();
@@ -116,7 +116,7 @@ void AddVecStreamed(Real alpha, std::vector<CuSubVector<Real>* > &des,
 
 template
 void AddVecStreamed(float alpha, std::vector<CuSubVector<float>* > &des,
-		const std::vector<CuSubVector<float>* > &src, float beta = 1.0);
+		const std::vector<CuSubVector<float>* > &src, float beta);
 
 template
 void AddVecStreamed(double alpha, std::vector<CuSubVector<double>* > &des,
@@ -206,7 +206,7 @@ void AddStreamed(std::vector<CuSubVector<double>* > &vec, std::vector<double> &v
 
 template<typename Real>
 void AddRowSumMatStreamed(Real alpha, std::vector<CuSubVector<Real>* > &des_vec,
-		const std::vector<CuSubMatrix<Real>* > &src, Real beta = 1.0)
+		const std::vector<CuSubMatrix<Real>* > &src, Real beta)
 {
 	  KALDI_ASSERT(src.size() == des_vec.size());
 	  int32 size = src.size();
@@ -242,15 +242,15 @@ void AddRowSumMatStreamed(Real alpha, std::vector<CuSubVector<Real>* > &des_vec,
 
 template
 void AddRowSumMatStreamed(float alpha, std::vector<CuSubVector<float>* > &des_vec,
-		const std::vector<CuSubMatrix<float>* > &src_mat, float beta = 1.0);
+		const std::vector<CuSubMatrix<float>* > &src_mat, float beta);
 
 template
 void AddRowSumMatStreamed(double alpha, std::vector<CuSubVector<double>* > &des_vec,
-		const std::vector<CuSubMatrix<double>* > &src_mat, double beta = 1.0);
+		const std::vector<CuSubMatrix<double>* > &src_mat, double beta);
 
 template<typename Real>
 void AddColSumMatStreamed(Real alpha, std::vector<CuSubVector<Real>* > &des_vec,
-		const std::vector<CuSubMatrix<Real>* > &src, Real beta = 1.0) {
+		const std::vector<CuSubMatrix<Real>* > &src, Real beta) {
 	  KALDI_ASSERT(src.size() == des_vec.size());
 	  int32 size = src.size();
 
@@ -285,11 +285,11 @@ void AddColSumMatStreamed(Real alpha, std::vector<CuSubVector<Real>* > &des_vec,
 
 template
 void AddColSumMatStreamed(float alpha, std::vector<CuSubVector<float>* > &des_vec,
-		const std::vector<CuSubMatrix<float>* > &src, float beta = 1.0);
+		const std::vector<CuSubMatrix<float>* > &src, float beta);
 
 template
 void AddColSumMatStreamed(double alpha, std::vector<CuSubVector<double>* > &des_vec,
-		const std::vector<CuSubMatrix<double>* > &src, double beta = 1.0);
+		const std::vector<CuSubMatrix<double>* > &src, double beta);
 
 template<typename Real>
 Real VecSumStreamed(const std::vector<CuSubVector<Real>* > &vec, std::vector<Real> *sum_vec) {

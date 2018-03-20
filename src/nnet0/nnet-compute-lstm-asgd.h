@@ -25,7 +25,10 @@
 
 #include <string>
 #include <iomanip>
+
+#if HAVE_MPI == 1
 #include <mpi.h>
+#endif
 
 #include "nnet-trnopts.h"
 #include "nnet0/nnet-randomizer.h"
@@ -83,6 +86,7 @@ struct NnetLstmStats {
 
     void MergeStats(NnetLstmUpdateOptions *opts, int root)
     {
+#if HAVE_MPI == 1
     	int myid = opts->parallel_opts->myid;
     	MPI_Barrier(MPI_COMM_WORLD);
 
@@ -105,7 +109,7 @@ struct NnetLstmStats {
         } else {
         		KALDI_ERR << "Unknown objective function code : " << opts->objective_function;
         }
-
+#endif
     }
 
     void Print(NnetLstmUpdateOptions *opts, double time_now)

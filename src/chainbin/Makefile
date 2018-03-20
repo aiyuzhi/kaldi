@@ -5,7 +5,6 @@ include ../kaldi.mk
 
 LDFLAGS += $(CUDA_LDFLAGS)
 LDLIBS += $(CUDA_LDLIBS)
-LDLIBS += $(MPICH_LDLIBS)
 
 BINFILES = chain-est-phone-lm chain-get-supervision chain-make-den-fst \
         nnet3-chain-get-egs nnet3-chain-copy-egs nnet3-chain-merge-egs \

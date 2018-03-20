@@ -25,7 +25,10 @@
 
 #include <string>
 #include <iomanip>
+
+#if HAVE_MPI == 1
 #include <mpi.h>
+#endif
 
 #include "nnet-trnopts.h"
 #include "nnet-pdf-prior.h"
@@ -171,6 +174,7 @@ struct NnetSequentialStats {
 
     void MergeStats(NnetSequentialUpdateOptions *opts, int root)
     {
+#if HAVE_MPI == 1
     		int myid = opts->parallel_opts->myid;
     		MPI_Barrier(MPI_COMM_WORLD);
 
@@ -197,6 +201,7 @@ struct NnetSequentialStats {
 
     		addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&total_frame_acc));
     		MPI_Reduce(addr, (void*)(&total_frame_acc), 1, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+#endif
     }
 
   NnetSequentialStats() { std::memset(this, 0, sizeof(*this)); }

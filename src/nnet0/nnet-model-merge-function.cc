@@ -54,12 +54,14 @@ ModelMergeFunction::Factory(const NnetParallelOptions *opts, NnetModelSync *mode
 
 int ModelMergeFunction:: MergeStatus(int status)
 {
-	MPI_Barrier(MPI_COMM_WORLD);
 	int total_status = 0;
+#if HAVE_MPI == 1
+	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Allreduce(&status, (void*)(&total_status), 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
 	if (total_status < opts->num_procs)
 		this->misLastMerge = true;
+#endif
 	return	total_status;
 }
 
@@ -96,6 +98,7 @@ void ModelAverageMerge::Merge(int root)
 void ModelAverageMerge::Merge(int root)
 {
 
+#if HAVE_MPI == 1
     void *srcaddr = (void *) MPI_IN_PLACE;
     void *dstaddr = (void *) this->model_sync_->data_;
 
@@ -105,6 +108,7 @@ void ModelAverageMerge::Merge(int root)
     cblas_Xscal(model_sync_->Dim(), 1.0/opts->num_procs, model_sync_->data_, 1);
 
     this->mLeftMerge--;
+#endif
 }
 
 void
@@ -148,7 +152,7 @@ ModelGlobalSumMerge::Init()
 
 void ModelGlobalSumMerge::Merge(int root)
 {
-
+#if HAVE_MPI == 1
 	NnetModelSync *model_sync = this->model_sync_;
 
 	float eta = this->mLearningRate;
@@ -179,6 +183,7 @@ void ModelGlobalSumMerge::Merge(int root)
     {
         std::memcpy(model_sync->data_, this->nnet_data_, dim_ * sizeof(BaseFloat));
     }
+#endif
 
 	//t2 = MPI_Wtime();
 			//c = (t2-t1)*1000;
@@ -251,6 +256,7 @@ void ModelGlobalGradientMerge::Init()
 
 void ModelGlobalGradientMerge::Merge(int root)
 {
+#if HAVE_MPI == 1
     double t1, t2, tk;
     Timer tm;
 	void *srcaddr = (void *) (opts->myid==root ? MPI_IN_PLACE : this->model_sync_->data_);
@@ -299,6 +305,7 @@ void ModelGlobalGradientMerge::Merge(int root)
     {
 	    std::memcpy(this->model_sync_->data_, this->nnet_data_, dim_ * sizeof(BaseFloat));
 	}
+#endif
     
 	this->mLeftMerge--;
 
@@ -321,7 +328,7 @@ void ModelGlobalAdagradMerge::AdaGrad(int32 dim, BaseFloat eta, BaseFloat K, con
 
 void ModelGlobalAdagradMerge::Merge(int root)
 {
-
+#if HAVE_MPI == 1
 	NnetModelSync *model_sync = this->model_sync_;
 
 	float eta = this->mLearningRate;
@@ -353,6 +360,7 @@ void ModelGlobalAdagradMerge::Merge(int root)
     {
         std::memcpy(model_sync->data_, this->nnet_data_, dim_ * sizeof(BaseFloat));
     }
+#endif
 
 	//t2 = MPI_Wtime();
 			//c = (t2-t1)*1000;

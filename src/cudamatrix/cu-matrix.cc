@@ -2624,7 +2624,7 @@ void AddMatMatStreamed(const double alpha, std::vector<CuSubMatrix<double>* > &C
 
 template<typename Real>
 void AddMatStreamed(const Real alpha, std::vector<CuSubMatrix<Real>* > &C,
-		const std::vector<CuSubMatrix<Real>* > &A, MatrixTransposeType transA = kNoTrans)
+		const std::vector<CuSubMatrix<Real>* > &A, MatrixTransposeType transA)
 {
 	  KALDI_ASSERT(A.size() == C.size());
 	  int32 size = A.size();

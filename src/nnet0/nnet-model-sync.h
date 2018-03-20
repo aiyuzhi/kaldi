@@ -25,7 +25,10 @@
 #include "nnet0/nnet-nnet.h"
 
 #include "cudamatrix/cu-device.h"
+
+#if HAVE_MPI == 1
 #include <mpi.h>
+#endif
 
 namespace kaldi {
 namespace nnet0 {

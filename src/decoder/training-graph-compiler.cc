@@ -59,34 +59,6 @@ TrainingGraphCompiler::TrainingGraphCompiler(const TransitionModel &trans_model,
   }
 }
 
-TrainingGraphCompiler::TrainingGraphCompiler(fst::VectorFst<fst::StdArc> *lex_fst,
-                                             const std::vector<int32> &disambig_syms,
-                                             const TrainingGraphCompilerOptions &opts):
-		token_fst_(NULL), ctx_fst_(NULL), lex_fst_(lex_fst), disambig_syms_(disambig_syms), opts_(opts) {
-  using namespace fst;
-
-  {  // make sure lexicon is olabel sorted.
-    fst::OLabelCompare<fst::StdArc> olabel_comp;
-    fst::ArcSort(lex_fst_, olabel_comp);
-  }
-}
-
-TrainingGraphCompiler::TrainingGraphCompiler(fst::VectorFst<fst::StdArc> *token_fst,
-					     fst::VectorFst<fst::StdArc> *ctx_fst,
-					     fst::VectorFst<fst::StdArc> *lex_fst,
-                                             const std::vector<int32> &disambig_syms,
-                                             const TrainingGraphCompilerOptions &opts):
-		token_fst_(token_fst), ctx_fst_(ctx_fst), lex_fst_(lex_fst), disambig_syms_(disambig_syms), opts_(opts) {
-  using namespace fst;
-
-  {  // make sure lexicon is olabel sorted.
-    fst::OLabelCompare<fst::StdArc> olabel_comp;
-    fst::ArcSort(lex_fst_, olabel_comp);
-    fst::ArcSort(token_fst, olabel_comp);
-    fst::ArcSort(ctx_fst, olabel_comp);
-  }
-}
-
 bool TrainingGraphCompiler::CompileGraphFromText(
     const std::vector<int32> &transcript,
     fst::VectorFst<fst::StdArc> *out_fst) {

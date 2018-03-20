@@ -25,7 +25,10 @@
 
 #include <string>
 #include <iomanip>
+
+#if HAVE_MPI == 1
 #include <mpi.h>
+#endif
 
 #include "nnet-trnopts.h"
 #include "nnet0/nnet-randomizer.h"

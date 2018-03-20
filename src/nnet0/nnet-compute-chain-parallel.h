@@ -24,7 +24,10 @@
 
 #include <string>
 #include <iomanip>
+
+#if HAVE_MPI == 1
 #include <mpi.h>
+#endif
 
 #include "nnet-trnopts.h"
 #include "nnet0/nnet-randomizer.h"
@@ -89,6 +92,7 @@ struct ChainInfo : kaldi::nnet3::ObjectiveFunctionInfo {
 	}
 
 	void Merge(int myid, int root) {
+#if HAVE_MPI == 1
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		void *addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->tot_weight));
@@ -99,6 +103,7 @@ struct ChainInfo : kaldi::nnet3::ObjectiveFunctionInfo {
 
 		addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->tot_aux_objf));
 		MPI_Reduce(addr, (void*)(&this->tot_aux_objf), 1, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+#endif
 	}
 };
 
@@ -122,6 +127,7 @@ struct NnetChainStats: NnetStats {
 
     void MergeStats(NnetUpdateOptions *opts, int root)
     {
+#if HAVE_MPI == 1
     	int myid = opts->parallel_opts->myid;
     	MPI_Barrier(MPI_COMM_WORLD);
 
@@ -137,6 +143,7 @@ struct NnetChainStats: NnetStats {
         	ChainInfo &info = iter->second;
         	info.Merge(myid, root);
         }
+#endif
     }
 
     void Print(NnetUpdateOptions *opts, double time_now)

@@ -27,7 +27,10 @@
 
 #include <sstream>
 #include <iterator>
+
+#if HAVE_MPI == 1
 #include <mpi.h>
+#endif
 
 namespace kaldi {
 namespace nnet0 {
@@ -650,7 +653,7 @@ void CBXent::Add(CBXent *xent)
 
 void CBXent::Merge(int myid, int root)
 {
-
+#if HAVE_MPI == 1
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	void *addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->frames_));
@@ -680,6 +683,7 @@ void CBXent::Merge(int myid, int root)
 		addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->class_frames_.front()));
 		MPI_Reduce(addr, (void*)(&this->class_frames_.front()), this->class_frames_.size(), MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
 	}
+#endif
 }
 
 /* Mse */
@@ -764,7 +768,7 @@ void Xent::Add(LossItf *loss)
 
 void Xent::Merge(int myid, int root)
 {
-
+#if HAVE_MPI == 1
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	void *addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->frames_));
@@ -779,6 +783,7 @@ void Xent::Merge(int myid, int root)
 
 	addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->entropy_));
 	MPI_Reduce(addr, (void*)(&this->entropy_), 1, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+#endif
 }
 
 
@@ -830,7 +835,7 @@ void Mse::Add(LossItf *loss)
 
 void Mse::Merge(int myid, int root)
 {
-
+#if HAVE_MPI == 1
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	void *addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->frames_));
@@ -838,7 +843,7 @@ void Mse::Merge(int myid, int root)
 
 	addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->loss_));
 	MPI_Reduce(addr, (void*)(&this->loss_), 1, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
-
+#endif
 }
 
 
@@ -1265,7 +1270,7 @@ void Ctc::Add(Ctc *ctc)
 
 void Ctc::Merge(int myid, int root)
 {
-
+#if HAVE_MPI == 1
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	void *addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->error_num_));
@@ -1273,7 +1278,7 @@ void Ctc::Merge(int myid, int root)
 
 	addr = (void *) (myid==root ? MPI_IN_PLACE : (void*)(&this->ref_num_));
 	MPI_Reduce(addr, (void*)(&this->ref_num_), 1, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
-
+#endif
 }
 
 std::string Ctc::Report() {

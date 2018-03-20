@@ -5,7 +5,6 @@ include ../kaldi.mk
 
 LDFLAGS += $(CUDA_LDFLAGS)
 LDLIBS += $(CUDA_LDLIBS)
-LDLIBS += $(MPICH_LDLIBS)
 
 BINFILES = nnet-am-info nnet-init \
    nnet-train-simple nnet-train-ensemble nnet-train-transitions nnet-latgen-faster nnet-am-copy \
