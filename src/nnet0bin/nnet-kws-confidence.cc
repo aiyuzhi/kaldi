@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 
 
     std::string keywords_str;
-    po.Register("keywords-id", &keywords_str, "keywords index in network output.");
+    po.Register("keywords-id", &keywords_str, "keywords index in network output(e.g. 348|363:369|328|355:349.");
 
     po.Read(argc, argv);
 
@@ -65,9 +65,15 @@ int main(int argc, char *argv[]) {
 		confidence_wspecifier = po.GetArg(3);
 
     //keywords id list
-    std::vector<int32> keywords;
-    if (!kaldi::SplitStringToIntegers(keywords_str, ":", false, &keywords))
-    	KALDI_ERR << "Invalid keywords id string " << keywords_str;
+    std::vector<std::string> kws_str;
+    std::vector<std::vector<int32> > keywords;
+    if (!kaldi::SplitStringToVector(keywords_str, "|", false, &kws_str))
+    		KALDI_ERR << "Invalid keywords id string " << keywords_str;
+    keywords.resize(kws_str.size());
+    for(int i = 0; i < kws_str.size(); i++) {
+    		if (!kaldi::SplitStringToIntegers(kws_str[i], ":", false, &keywords[i]))
+    	    		KALDI_ERR << "Invalid keywords id string " << kws_str[i];
+    }
 
     kaldi::int64 tot_t = 0;
 
@@ -94,7 +100,7 @@ int main(int argc, char *argv[]) {
       // kws confidence
       int rows = mat.NumRows();
       //int cols = mat.NumCols();
-      int cols = keywords.size()+1;
+      int cols = kws_str.size()+1;
       post_smooth.Resize(rows, cols);
       confidence.Resize(rows, 2*cols);
       int hs, hm;
@@ -102,36 +108,37 @@ int main(int argc, char *argv[]) {
 
       // posterior smoothing
       for (int j = 0; j < rows; j++) {
-    	  for (int i = 1; i < cols; i++) {
-    		  hs = j-w_smooth+1 > 0 ? j-w_smooth+1 : 0;
-    		  sum = 0;
-    		  for (int k = hs; k <= j; k++) {
-    			  sum += mat(k, keywords[i-1]);
-    		  }
-    		  post_smooth(j, i) = sum/(j-hs+1);
-    	  }
+		  for (int i = 1; i < cols; i++) {
+			  hs = j-w_smooth+1 > 0 ? j-w_smooth+1 : 0;
+			  sum = 0;
+			  for (int k = hs; k <= j; k++) {
+				  for (int m = 0; m < keywords[i-1].size(); m++)
+					  sum += mat(k, keywords[i-1][m]);
+			  }
+			  post_smooth(j, i) = sum/(j-hs+1);
+		  }
       }
 
       // compute confidence score
       // confidence.Set(1.0);
       for (int j = 0; j < rows; j++) {
           mul = 1.0;
-    	  for (int i = 1; i < cols; i++) { // 1,2,...,n-1 keywords
-    		  hm = j-w_max+1 > 0 ? j-w_max+1 : 0;
-    		  max = 0;
-              maxid = hm;
+		  for (int i = 1; i < cols; i++) { // 1,2,...,n-1 keywords
+			  hm = j-w_max+1 > 0 ? j-w_max+1 : 0;
+			  max = 0;
+			  maxid = hm;
 			  for (int k = hm; k <= j; k++) {
-                  if (max < post_smooth(k, i)) {
-                       max = post_smooth(k, i);
-                       maxid = k;
-                  } 
+				  if (max < post_smooth(k, i)) {
+					   max = post_smooth(k, i);
+					   maxid = k;
+				  }
 			  }
 			  confidence(j,2*i) = max;
 			  confidence(j,2*i+1) = maxid;
-              mul *= max;
-    	  }
-    	  confidence(j,0) = pow(mul, 1.0/(cols-1));
-    	  confidence(j,1) = j;
+			  mul *= max;
+		  }
+    	  	  confidence(j,0) = pow(mul, 1.0/(cols-1));
+    	  	  confidence(j,1) = j;
       }
 
       smooth_writer.Write(output_reader.Key(), post_smooth);
