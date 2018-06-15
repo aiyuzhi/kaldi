@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
 	try {
 
 	    using namespace kaldi;
-	    using namespace fst;
 
 	    typedef kaldi::int32 int32;
 
@@ -62,6 +61,7 @@ int main(int argc, char *argv[])
 	    std::ifstream wavlist_reader(wavlist_rspecifier);
 
 	    BaseFloat  total_frames = 0, num_frames;
+        size_t size;
         Matrix<BaseFloat> audio_data;
 	    FeatState state;
         char fn[1024];
@@ -76,14 +76,13 @@ int main(int argc, char *argv[])
 
 			    const WaveData &wave_data = holder.Value();
                 audio_data = wave_data.Data();
-                samp_freq = wave_data.SampFreq();
             }
             else if (audio_format == "pcm") {
-                std::ifstream pcm_reader(fn, ios::binary);
+                std::ifstream pcm_reader(fn, std::ios::binary);
                 // get length of file:
-                pcm_reader.seekg(0, ios::end);
+                pcm_reader.seekg(0, std::ios::end);
                 int length = pcm_reader.tellg();
-                pcm_reader.seekg(0, ios::beg);
+                pcm_reader.seekg(0, std::ios::beg);
                 size = length/sizeof(short);
                 std::vector<short> buffer(size);
                 // read data as a block:

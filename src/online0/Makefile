@@ -9,7 +9,8 @@ TESTFILES =
 
 OBJFILES = online-util.o online-nnet-faster-decoder.o online-feature.o \
 		   online-nnet-feature-pipeline.o online-fst-decoder.o \
-		   online-ivector-feature.o online-ivector-extractor.o decoder_export.o ivector_export.o
+		   online-ivector-feature.o online-ivector-extractor.o online-keyword-spotting.o \
+		   decoder_export.o ivector_export.o
 
 LIBNAME = kaldi-online0
 

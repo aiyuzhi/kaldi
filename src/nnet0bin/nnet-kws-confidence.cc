@@ -67,8 +67,7 @@ int main(int argc, char *argv[]) {
     //keywords id list
     std::vector<std::string> kws_str;
     std::vector<std::vector<int32> > keywords;
-    if (!kaldi::SplitStringToVector(keywords_str, "|", false, &kws_str))
-    		KALDI_ERR << "Invalid keywords id string " << keywords_str;
+    kaldi::SplitStringToVector(keywords_str, "|", false, &kws_str);
     keywords.resize(kws_str.size());
     for(int i = 0; i < kws_str.size(); i++) {
     		if (!kaldi::SplitStringToIntegers(kws_str[i], ":", false, &keywords[i]))

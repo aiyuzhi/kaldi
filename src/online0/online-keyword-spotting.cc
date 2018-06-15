@@ -36,15 +36,13 @@ OnlineKeywordSpotting::OnlineKeywordSpotting(std::string cfg) :
 	ReadConfigFromFile(kws_config_->forward_cfg, forward_opts_);
 
 	//keywords id list
-	std::vector<std::string> kws_str;
-
-	if (!kaldi::SplitStringToVector(kws_config_->keywords_id, "|", false, &kws_str))
-		KALDI_ERR << "Invalid keywords id string " << kws_config_->keywords_id;
-	keywords_.resize(kws_str.size());
-	for(int i = 0; i < kws_str.size(); i++) {
-		if (!kaldi::SplitStringToIntegers(kws_str[i], ":", false, &keywords_[i]))
-			KALDI_ERR << "Invalid keywords id string " << kws_str[i];
-	}
+    std::vector<std::string> kws_str;
+    kaldi::SplitStringToVector(kws_config_->keywords_id, "|", false, &kws_str);
+    keywords_.resize(kws_str.size());
+    for(int i = 0; i < kws_str.size(); i++) {
+            if (!kaldi::SplitStringToIntegers(kws_str[i], ":", false, &keywords_[i]))
+                    KALDI_ERR << "Invalid keywords id string " << kws_str[i];
+    }   
 }
 
 void OnlineKeywordSpotting::InitKws() {
@@ -78,8 +76,9 @@ int OnlineKeywordSpotting::FeedData(void *data, int nbytes, FeatState state) {
 		if (frame_ready_ == frame_offset_)
 			return 0;
 
+        feat_in_.Resize(frame_ready_-frame_offset_, forward_->InputDim());
 		for (int i = frame_offset_; i < frame_ready_; i++) {
-			feature_pipeline_->GetFrame(i, &feat_in_.Row(i));
+			feature_pipeline_->GetFrame(i, &feat_in_.Row(i-frame_offset_));
 		}
 
 		// feed forward to neural network
@@ -182,11 +181,11 @@ int OnlineKeywordSpotting::isWakeUp() {
 	// maximal score statistical information
 	if (state_ == FEAT_END) {
 		std::ostringstream os;
-		os << wakeup_frame_ << "\t";
+		os << wakeup_frame_ << " ";
 		for (int i = 0; i < cols; i++) {
-			os << confidence_(wakeup_frame_,2*i) << "\t";
+			os << confidence_(wakeup_frame_,2*i) << " ";
 		}
-		os << confidence_(wakeup_frame_, 3) << "\t";
+		os << confidence_(wakeup_frame_, 3) << " ";
 		for (int i = 2; i < cols; i++) {
 			os << confidence_(wakeup_frame_,2*i+1)-confidence_(wakeup_frame_,2*(i-1)+1) << "\t";
 		}
