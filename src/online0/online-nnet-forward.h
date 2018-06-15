@@ -171,6 +171,14 @@ public:
 		new_utt_flags_[0] = 0;
 	}
 
+	int32 OutputDim() {
+		return nnet_.OutputDim();
+	}
+
+	int32 InputDim() {
+		return nnet_transf_.InputDim();
+	}
+
 	void ResetHistory() {
 		new_utt_flags_[0] = 1;
 	}
