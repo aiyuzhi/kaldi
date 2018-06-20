@@ -93,7 +93,8 @@ private:
 	std::vector<std::vector<int32> > keywords_;
 
 	// decoding buffer
-	Matrix<BaseFloat> feat_in_, nnet_out_, posterior_, post_smooth_, confidence_;
+	Matrix<BaseFloat> feat_in_, nnet_out_, posterior_,
+						post_smooth_, confidence_, buffer_;
 	// wav buffer
 	Vector<BaseFloat> wav_buffer_;
 	FeatState state_;

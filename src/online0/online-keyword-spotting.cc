@@ -59,7 +59,7 @@ int OnlineKeywordSpotting::FeedData(void *data, int nbytes, FeatState state) {
 	if (nbytes > 0) {
 		int size = nbytes/sizeof(float);
 		wav_buffer_.Resize(size, kUndefined);
-		memcpy((char*)(wav_buffer_.Data()+len_), (char*)data, nbytes);
+		memcpy((char*)(wav_buffer_.Data()), (char*)data, nbytes);
 		len_ += size;
 	}
 
@@ -118,8 +118,8 @@ int OnlineKeywordSpotting::isWakeUp() {
 	int word_interval = kws_config_->word_interval;
 	int cols = keywords_.size()+1;
 
-	int hs, hm;
-	float sum, max, maxid, mul;
+	int hs, hm, pre_t, cur_t;
+	float sum, max, maxid, mul, sscore, pre_score, cur_score;
 
 	// posterior smoothing
 	for (int j = post_offset_; j < post_offset_+new_rows; j++) {
@@ -138,22 +138,53 @@ int OnlineKeywordSpotting::isWakeUp() {
 	// confidence.Set(1.0);
 	for (int j = post_offset_; j < post_offset_+new_rows; j++) {
 		mul = 1.0;
-		for (int i = 1; i < cols; i++) { // 1,2,...,n-1 keywords
-			hm = j-w_max+1 > 0 ? j-w_max+1 : 0;
-			max = 0;
-			maxid = hm;
-			for (int k = hm; k <= j; k++) {
-				if (max < post_smooth_(k, i)) {
-				   max = post_smooth_(k, i);
-				   maxid = k;
+		hm = j-w_max+1 > 0 ? j-w_max+1 : 0;
+
+		// the first keyword
+		for (int k = 1; k <= j-hm+1; k++) {
+			buffer_(k, 1) = post_smooth_(k+hm-1,1);
+			buffer_(k, 2) = k; // time stamp
+			if (buffer_(k, 1) < buffer_(k-1, 1)) {
+				buffer_(k, 1) = buffer_(k-1, 1);
+				buffer_(k, 2) = buffer_(k-1, 2);
+			}
+		}
+
+		// 2,...,n keywords
+		for (int i = 2; i < cols; i++) {
+			for (int k = i; k <= j-hm+1; k++) {
+				buffer_(k, 2*i-1) = buffer_(k-1, 2*i-1);
+				buffer_(k, 2*i) = buffer_(k-1, 2*i);
+				sscore = buffer_(k-1, 2*i-3) * post_smooth_(k+hm-1, i);
+				if (buffer_(k, 2*i-1) < sscore) {
+					buffer_(k, 2*i-1) = sscore;
+					buffer_(k, 2*i) = k-1; //(k-1)+(hm-1);
 				}
 			}
-			confidence_(j,2*i) = max;
-			confidence_(j,2*i+1) = maxid;
-			mul *= max;
 		}
+
+		mul = buffer_(j-hm+1, 2*(cols-1)-1);
 		confidence_(j,0) = pow(mul, 1.0/(cols-1));
-		confidence_(j,1) = j;
+		confidence_(j,1) = j; // time stamp
+
+		// back tracking
+		cur_t = j-hm+1;
+		for (int i = cols-1; i > 1; i--) {
+			pre_t = buffer_(cur_t, 2*i);
+			pre_score = buffer_(pre_t, 2*(i-1)-1);
+
+			// the nth keyword score
+			confidence_(j,2*i) = mul/pre_score;
+
+			// the nth keyword time stamp
+			confidence_(j,2*i+1) = (pre_t+1)+(hm-1);
+
+			mul /= pre_score;
+			cur_t = pre_t;
+		}
+
+		confidence_(j,2) = buffer_(cur_t, 1);
+		confidence_(j,3) = buffer_(cur_t, 2);
 
 		// is wakeup?
 		bool flag = true;
@@ -204,6 +235,7 @@ void OnlineKeywordSpotting::Reset() {
 	int cols = keywords_.size()+1;
 	post_smooth_.Resize(MATRIX_INC_STEP, cols);
 	confidence_.Resize(MATRIX_INC_STEP, 2*cols);
+	buffer_.Resize(kws_config_->sliding_window+1, keywords_.size()*2+1);
 
 	iswakeup_ = len_ = sample_offset_ = 0;
 	frame_ready_ = frame_offset_ = post_offset_ = 0;
