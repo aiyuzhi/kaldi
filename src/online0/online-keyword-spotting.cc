@@ -119,7 +119,7 @@ int OnlineKeywordSpotting::isWakeUp() {
 	int cols = keywords_.size()+1;
 
 	int hs, hm, pre_t, cur_t;
-	float sum, max, maxid, mul, sscore, pre_score, cur_score;
+	float sum, mul, sscore, pre_score;
 
 	// posterior smoothing
 	for (int j = post_offset_; j < post_offset_+new_rows; j++) {
@@ -163,6 +163,7 @@ int OnlineKeywordSpotting::isWakeUp() {
 			}
 		}
 
+        // final score
 		mul = buffer_(j-hm+1, 2*(cols-1)-1);
 		confidence_(j,0) = pow(mul, 1.0/(cols-1));
 		confidence_(j,1) = j; // time stamp
@@ -179,12 +180,12 @@ int OnlineKeywordSpotting::isWakeUp() {
 			// the nth keyword time stamp
 			confidence_(j,2*i+1) = (pre_t+1)+(hm-1);
 
-			mul /= pre_score;
+			mul = pre_score;
 			cur_t = pre_t;
 		}
 
 		confidence_(j,2) = buffer_(cur_t, 1);
-		confidence_(j,3) = buffer_(cur_t, 2);
+		confidence_(j,3) = buffer_(cur_t, 2)+(hm-1);
 
 		// is wakeup?
 		bool flag = true;
